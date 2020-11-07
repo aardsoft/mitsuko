@@ -1,0 +1,64 @@
+* mitsuko compositor                                                  :TOC_4:
+  - [[#introduction][Introduction]]
+  - [[#building][Building]]
+  - [[#running][Running]]
+  - [[#configuring][Configuring]]
+
+** Introduction
+This is an attempt to create a wayland compositor, implementing the main features I use in [[https://tuomov.iki.fi/software/ion/][ion3]] to make switching for me as painless as possible. Those features are:
+
+0. use pretty much static frame layouts, with multiple applications possible per frame
+1. open a terminal in current frame with F2
+2. query for and open a man page in current frame with F1
+3. run arbitrary commands with F3
+4. query for and start a SSH connection with F4 (mosh with ALT+F4)
+5. open an Emacs frame attaching to an Emacs daemon with ALT+F5
+6. switch between frames and workspaces by keyboard navigation only
+7. have an easy to toggle scratch pad
+8. have an optional statusbar at the bottom of the screen
+9. improve on the scripting to allow most of the behaviour to be changed at runtime.
+
+While there are interesting projects like [[https://github.com/malcolmstill/ulubis][ulubis]] trying to build sensible compositors for Wayland they generally are far from usable, and due to the attempt to (re-)build all the low level wayland stuff require a lot of work to get there. While it my eventually prove to be a bad decision basing this on top of Qt`s wayland compositor code allows quick prototyping and reuse of a lot of existing code.
+
+As this is written completely in QML and LISP adjustments can be made quickly without recompiling the core binary, and in many cases even to a running instance, satisfying item 9 from above list.
+
+** Building
+You need [[https://common-lisp.net/project/ecl/][ecl]] and [[https://gitlab.com/eql/EQL5/][EQL5]], either from distribution packages or in a path where it can be found by qmake.
+
+With those installed, change to the =src= directory, and run:
+
+#+BEGIN_SRC bash
+$ eql5 make.lisp
+$ qmake
+$ make
+#+END_SRC
+
+You should now have a =mitsuko= binary, which is self contained (apart from the dynamically linked libraries, obviously)
+
+** Running
+
+mitsuko can be started from a text console with =mitsuko -platform eglfs=. To use from X it may be necessary to set =QT_XCB_GL_INTEGRATION= and =QT_WAYLAND_CLIENT_BUFFER_INTEGRATION= for either egl or glx:
+
+#+BEGIN_SRC bash
+QT_XCB_GL_INTEGRATION=xcb_egl QT_WAYLAND_CLIENT_BUFFER_INTEGRATION=xcomposite-egl mitsuko
+#+END_SRC
+
+On X a grey window should pop up. To start Qt programs in there execute them with =-platform wayland=. Most other toolkits have similar options.
+
+** Configuring
+
+When starting mitsuko without any configuration it'll just set up a minimal compositor in =~/.local/share/mitsuko/mitsuko-vanilla-main.qml=, which is generally not very useful.
+
+On startup mitsuko searches for =mitsuko-init.lisp= in the common data directories. For modifying it the best place is =~/.local/share/mitsuko/mitsuko-vanilla-main.qml=. A minimal one could look like this:
+
+#+BEGIN_SRC lisp
+(in-package :mitsuko)
+
+(defun mitsuko-init()
+  (x:do-with *qml-application-engine*
+    (|load| (|fromLocalFile.QUrl| (find-in-app-data "minimal.qml")))
+    ;; add other settings for the application engine here
+    ))
+#+END_SRC
+
+The compositor implementation needs to be placed in =minimal.qml= in one of the application data directories. Future versions of mitsuko should ship implementations for this to be placed into system wide application data directories.
