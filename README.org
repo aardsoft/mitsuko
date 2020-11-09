@@ -1,12 +1,25 @@
 * mitsuko compositor                                                  :TOC_4:
   - [[#introduction][Introduction]]
+    - [[#core-library][Core library]]
+    - [[#ion4-implementation][ion4 implementation]]
   - [[#building][Building]]
   - [[#running][Running]]
   - [[#configuring][Configuring]]
+    - [[#running-a-custom-implementation][Running a custom implementation]]
+    - [[#running-the-ion4-implementation][Running the ion4 implementation]]
+  - [[#slimeswank][slime/swank]]
+  - [[#references][References]]
 
 ** Introduction
-This is an attempt to create a wayland compositor, implementing the main features I use in [[https://tuomov.iki.fi/software/ion/][ion3]] to make switching for me as painless as possible. Those features are:
+This is an attempt to create a framework to easily create and modify Wayland compositors using QML and Lisp, as well as including one or more fully usable reference implementations.
 
+While there are interesting projects like [[https://github.com/malcolmstill/ulubis][ulubis]] trying to build sensible compositors for Wayland they generally are far from usable, and due to the attempt to (re-)build all the low level Wayland stuff require a lot of work to get there. While it my eventually prove to be a bad decision basing this on top of Qt`s wayland compositor code allows quick prototyping and reuse of a lot of existing code.
+
+Mitsuko just has a very small compiled core to bootstrap the runtime, and loads everything else based on the initial user configuration. As this is written completely in QML and Lisp adjustments can be made quickly without recompiling the core binary, and in many cases even to a running instance.
+*** Core library
+The core library provides code which is not implementation specific, like a variant of EQL5s =qml-lisp=.
+*** ion4 implementation
+This is the main implementation, implementing the main features I use in [[https://tuomov.iki.fi/software/ion/][ion3]] to make switching for me as painless as possible. Those features are:
 0. use pretty much static frame layouts, with multiple applications possible per frame
 1. open a terminal in current frame with F2
 2. query for and open a man page in current frame with F1
@@ -17,11 +30,6 @@ This is an attempt to create a wayland compositor, implementing the main feature
 7. have an easy to toggle scratch pad
 8. have an optional statusbar at the bottom of the screen
 9. improve on the scripting to allow most of the behaviour to be changed at runtime.
-
-While there are interesting projects like [[https://github.com/malcolmstill/ulubis][ulubis]] trying to build sensible compositors for Wayland they generally are far from usable, and due to the attempt to (re-)build all the low level wayland stuff require a lot of work to get there. While it my eventually prove to be a bad decision basing this on top of Qt`s wayland compositor code allows quick prototyping and reuse of a lot of existing code.
-
-As this is written completely in QML and LISP adjustments can be made quickly without recompiling the core binary, and in many cases even to a running instance, satisfying item 9 from above list.
-
 ** Building
 You need [[https://common-lisp.net/project/ecl/][ecl]] and [[https://gitlab.com/eql/EQL5/][EQL5]], either from distribution packages or in a path where it can be found by qmake.
 
@@ -33,23 +41,42 @@ $ qmake
 $ make
 #+END_SRC
 
-You should now have a =mitsuko= binary, which is self contained (apart from the dynamically linked libraries, obviously)
+You should now have a =mitsuko= binary, which is capable of:
+
+- bringing up a minimal compositor, without the need for loading external files (apart from dynamically linked libraries, obviously)
+- load a reference implementation, if the files in the =lisp= directory are in one of the search paths (typically =/usr/share/mitsuko= for system wide installation, =~/.local/share/mitsuko= in a users home)
+- load a fully custom implementation by loading =mitsuko-init.lisp= from one of the search directories, and executing =(mitsuko-init)=
 
 ** Running
-
 mitsuko can be started from a text console with =mitsuko -platform eglfs=. To use from X it may be necessary to set =QT_XCB_GL_INTEGRATION= and =QT_WAYLAND_CLIENT_BUFFER_INTEGRATION= for either egl or glx:
 
 #+BEGIN_SRC bash
 QT_XCB_GL_INTEGRATION=xcb_egl QT_WAYLAND_CLIENT_BUFFER_INTEGRATION=xcomposite-egl mitsuko
 #+END_SRC
 
-On X a grey window should pop up. To start Qt programs in there execute them with =-platform wayland=. Most other toolkits have similar options.
+Without additional configuration grey window (X) or a grey screen should pop up. To start Qt programs in there execute them with =-platform wayland=. Most other toolkits have similar options.
 
 ** Configuring
 
-When starting mitsuko without any configuration it'll just set up a minimal compositor in =~/.local/share/mitsuko/mitsuko-vanilla-main.qml=, which is generally not very useful.
+When starting mitsuko without any configuration it'll just set up a minimal compositor in =~/.local/share/mitsuko/mitsuko-vanilla-main.qml=, which is generally not very useful, unless it's supposed to be used as starting point for a fully custom implementation
 
-On startup mitsuko searches for =mitsuko-init.lisp= in the common data directories. For modifying it the best place is =~/.local/share/mitsuko/mitsuko-vanilla-main.qml=. A minimal one could look like this:
+On startup mitsuko searches for =mitsuko-init.lisp= in the common data directories. It'll then check if =mitsuko-pre-init= and =mitsuko-init= are defined. It'll call them if defined, and otherwise fall back to builtin stubs.
+
+=mitsuko-pre-init= just sets up the =QQmlApplicationEngine=, so usually does not require an override.
+
+The default =mitsuko-init= generates the minimal QML and executes it - typically you'd want that to either load one of the included implemementations, or your own.
+
+To easily use core libraries or integrations from git additional directories can be added to the default search path:
+
+#+BEGIN_SRC lisp
+(setq *app-data-paths*
+      (nconc (list "/home/bwachter/git/misc/mitsuko/lisp/core"
+                   "/home/bwachter/git/misc/mitsuko/lisp/ion4")
+             *app-data-paths*))
+#+END_SRC
+
+*** Running a custom implementation
+To load your compositor from =~/.local/share/mitsuko/mitsuko-vanilla-main.qml= create the following =~/.local/share/mitsuko/mitsuko-init.lisp=:
 
 #+BEGIN_SRC lisp
 (in-package :mitsuko)
@@ -61,4 +88,35 @@ On startup mitsuko searches for =mitsuko-init.lisp= in the common data directori
     ))
 #+END_SRC
 
-The compositor implementation needs to be placed in =minimal.qml= in one of the application data directories. Future versions of mitsuko should ship implementations for this to be placed into system wide application data directories.
+*** Running the ion4 implementation
+
+#+BEGIN_SRC lisp
+(in-package :mitsuko)
+
+(defun mitsuko-init()
+  (l "ion4.lisp"))
+#+END_SRC
+
+** slime/swank
+mitsuko tries to locate a [[https://common-lisp.net/project/slime/][slime]] directory in one of the default directories by searching for =slime/swank.asd=. Both a git checkout or an unpacked release should be fine.
+
+To use an existing copy somewhere else =*swank-path*= can be set to an absolute path to the directory contaniing =swank.asd= in the init file. mitsuko core sets =*swank-available*= to =t= if it assumes swank is available, and loads the library. The swank server can then be started without additional configuration:
+
+#+BEGIN_SRC lisp
+(swank:create-server :port 4005
+                     :style mitsuko:*swank-port*
+                     :dont-close t)
+#+END_SRC
+
+Your custom implementation can also choose to start the swank server at startup:
+
+#+BEGIN_SRC lisp
+(when *is-swank-available*
+  (l "core/swank.lisp")
+  (create-swank-server))
+#+END_SRC
+
+The ion4 implementation does this.
+
+** References
+- [[https://wayland.freedesktop.org/docs/html/apa.html][Wayland Protocol Specification]]
