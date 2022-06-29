@@ -1,0 +1,20 @@
+#!/bin/bash
+# helper script to run mitsuko from inside the build tree
+
+if [ -n "$DISPLAY" ]; then
+    export QT_XCB_GL_INTEGRATION=xcb_egl
+    export QT_WAYLAND_CLIENT_BUFFER_INTEGRATION=xcomposite-egl
+else
+    export MITSUKO_ARGS="-platform eglfs"
+fi
+
+if ! [ -d build/MitsukoGridWM ]; then
+    echo "MitsukoGridWM missing, incomplete build?"
+    exit 1
+fi
+
+# this is hardcoded to include the ion4 module path for now
+export MITSUKO_PATH="`pwd`/lisp:`pwd`/lisp/ion4:`pwd`/lisp/float"
+export QML2_IMPORT_PATH="`pwd`/build:`pwd`/lisp/ion4:`pwd`/lisp/float:$QML2_IMPORT_PATH"
+./build/mitsuko/mitsuko "$MITSUKO_ARGS"
+echo "mitsuko finished: $?"

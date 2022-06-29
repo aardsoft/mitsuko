@@ -1,4 +1,4 @@
-(in-package :mitsuko)
+(in-package :mitsuko-core)
 
 (defun create-swank-server()
   (setf swank:*globally-redirect-io* t)

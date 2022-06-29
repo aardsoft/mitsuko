@@ -2,3 +2,13 @@
 Makefile
 src/mitsuko
 TODO.org
+*.o
+*.a
+*.so
+*.zip
+*.qmltypes
+*_metatypes.*
+moc_*.cpp*
+moc_*.h
+*_qmltyperegistrations.*
+build/

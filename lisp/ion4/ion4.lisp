@@ -1,10 +1,11 @@
-(in-package :mitsuko)
+(defpackage :mitsuko-compositor
+  (:use :cl :eql :mitsuko-core)
+  (:export
+   #:init-module))
 
-(l "core/qml-lisp.lisp")
+(in-package :mitsuko-compositor)
 
-(when *is-swank-available*
-  (l "core/swank.lisp")
-  (create-swank-server))
-
-(|load| *qml-application-engine*
-        (|fromLocalFile.QUrl| (find-in-app-data "qml/ion4.qml")))
+(defun init-module()
+  ""
+  (format t "ion4 compositor starting up.~%")
+  )

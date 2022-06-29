@@ -87,16 +87,16 @@
 ;;; utils
 
 (defun root-item ()
-  (when mitsuko:*qml-application-engine*
-    (if (= (qt-object-id mitsuko:*qml-application-engine*) #.(qid "QQmlApplicationEngine"))
-        (let ((object (first (|rootObjects| mitsuko:*qml-application-engine*))))
+  (when mitsuko-core:*qml-application-engine*
+    (if (= (qt-object-id mitsuko-core:*qml-application-engine*) #.(qid "QQmlApplicationEngine"))
+        (let ((object (first (|rootObjects| mitsuko-core:*qml-application-engine*))))
           (setf (qt-object-id object) #.(qid "QObject")) ; unknown to EQL, so resort to QObject
           object)
-        (qt-object-? (|rootObject| mitsuko:*qml-application-engine*)))))
+        (qt-object-? (|rootObject| mitsuko-core:*qml-application-engine*)))))
 
 (defun root-context ()
-  (when mitsuko:*qml-application-engine*
-    (|rootContext| mitsuko:*qml-application-engine*)))
+  (when mitsuko-core:*qml-application-engine*
+    (|rootContext| mitsuko-core:*qml-application-engine*)))
 
 (defun find-quick-item (object-name)
   "Finds the first QQuickItem matching OBJECT-NAME."
