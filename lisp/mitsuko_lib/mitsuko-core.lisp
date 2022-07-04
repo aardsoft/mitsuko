@@ -373,8 +373,11 @@ used for starting initial applications in a session."
   (unless *swank-path*
     (setf *swank-path* (find-in-app-data "slime/swank.asd")))
 
-  ;; this might make swank and other stuff loadable without compiler
-  ;;(ext:install-bytecodes-compiler)
+  ;; swank will get compiled - which will fail with the default options on
+  ;; systems without cc installed. This switches to byte compilation, which
+  ;; should always work. If needed it can be switched back later on using
+  ;; (ext:install-c-compiler)
+  (ext:install-bytecodes-compiler)
 
   (when *swank-path*
       (push (uiop:pathname-directory-pathname *swank-path*)
