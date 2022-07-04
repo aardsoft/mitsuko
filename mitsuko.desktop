@@ -1,0 +1,5 @@
+[Desktop Entry]
+Name=mitsuko
+Comment=The mitsuko Wayland compositor
+Exec=mitsuko
+Type=Application
