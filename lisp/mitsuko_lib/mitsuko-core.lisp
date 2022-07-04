@@ -327,6 +327,8 @@ will be sufficient."
   (setf .startup-timer. (qnew "QTimer" "singleShot" t "interval" 10))
   (qconnect .startup-timer. "timeout()" 'vanilla-post-init)
   (|start| .startup-timer.)
+  (unless (ensure-directories-exist (concatenate 'string *app-writable-path* "/"))
+    (format t "Unable to create writable directory ~A - this might be problematic.~%"))
   (if (uiop:getenvp "MITSUKO_MODULE")
       (progn
         (setf *mitsuko-module* (uiop:getenv "MITSUKO_MODULE"))
