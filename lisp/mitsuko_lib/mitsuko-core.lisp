@@ -28,6 +28,7 @@
 (defvar *app-writable-path* (|writableLocation.QStandardPaths| |QStandardPaths.DataLocation|))
 (defvar *is-swank-available* nil)
 (defvar *mitsuko-module* nil)
+(defvar *mitsuko-path* nil)
 (defvar *qml-application-engine nil)
 (defvar *qml-search-path* '("/usr/lib64/qml" "/usr/lib/qml"))
 (defvar *swank-path* nil)
@@ -56,6 +57,8 @@ absolute path if found, nil if not."
     (if (uiop:getenvp "MITSUKO_PATH")
         (let ((mitsuko_path_split (uiop:split-string (uiop:getenv "MITSUKO_PATH") :separator ":")))
           (setf data-paths (concatenate 'list mitsuko_path_split data-paths))))
+    (if *mitsuko-path*
+        (setf data-paths (concatenate 'list *mitsuko-path* data-paths)))
     (block nested
       (loop for path in data-paths
             do

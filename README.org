@@ -14,6 +14,7 @@
       - [[#app-writable-path][*app-writable-path*]]
       - [[#is-swank-available][*is-swank-available*]]
       - [[#mitsuko-module][*mitsuko-module*]]
+      - [[#mitsuko-path][*mitsuko-path*]]
       - [[#qml-application-engine][*qml-application-engine*]]
       - [[#qml-search-path][*qml-search-path*]]
       - [[#swank-path][*swank-path*]]
@@ -158,6 +159,9 @@ Initialised as =nil=, and set to =t= when swank has been located and loaded. Thi
 
 **** *mitsuko-module*
 The name of the mitsuko module to use. Defaults to =nil=, and must be set by either the =MITSUKO_MODULE= environment variable, or through user configuration.
+
+**** *mitsuko-path*
+Additional directories for mitsuko to search LISP and QML files in. Directories listed here are searched first, followed by =MITSUKO_PATH= environment variable, and then =*app-data-paths*=.
 
 **** *qml-application-engine*
 The QQmlApplicationEngine object used for displaying the QML part. This gets initialised in =vanilla-pre-init= - so if you decide to override that by defining =mitsuko-pre-init= in your configuration you'll need to create the object yourself.
