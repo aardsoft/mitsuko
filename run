@@ -15,6 +15,6 @@ fi
 
 # this is hardcoded to include the ion4 module path for now
 export MITSUKO_PATH="`pwd`/lisp:`pwd`/lisp/ion4:`pwd`/lisp/float"
-export QML2_IMPORT_PATH="`pwd`/build:`pwd`/lisp/ion4:`pwd`/lisp/float:$QML2_IMPORT_PATH"
+export QML2_IMPORT_PATH="`pwd`/build:`pwd`/lisp/ion4:`pwd`/lisp/float:`pwd`/lisp/minimal:$QML2_IMPORT_PATH:`pwd`"
 ./build/mitsuko/mitsuko "$MITSUKO_ARGS"
 echo "mitsuko finished: $?"
