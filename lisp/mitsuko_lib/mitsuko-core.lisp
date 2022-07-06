@@ -138,6 +138,12 @@ data directories"
   ;; this should never be reached
   (cl-user::quit .status-code.))
 
+(defun search-and-do-fun(package symbol)
+  "Search and evaluate function symbol"
+  (let ((fun (find-symbol symbol package)))
+    (if fun
+        (funcall fun))))
+
 ;;;; qml helpers
 ;; the qml generation is based on EQL5s palindrome example
 (defmacro with-qml-file ((file) &body body)
@@ -302,6 +308,7 @@ data directories"
         (setf (uiop:getenv "DISPLAY") nil)
 
         (l "core/qml-lisp.lisp")
+        (l "core/mitsuko.lisp")
 
         (when *is-swank-available*
           (l "core/swank.lisp")
@@ -311,7 +318,13 @@ data directories"
         ;; needs to happen through looking up the symbol + funcall
         (if (find-package :mitsuko-compositor)
             (progn
-              (let ((module-init (find-symbol "INIT-MODULE" :mitsuko-compositor)))
+              (let ((module-init (find-symbol "INIT-MODULE" :mitsuko-compositor))
+                    (module-flags (eval (find-symbol "*FLAGS*" :mitsuko-compositor))))
+                (if (and module-flags (find-package :mitsuko))
+                    (progn
+                      (format t "Loading module flags.~%")
+                      (cond ((member :settings-plugin module-flags)
+                             (search-and-do-fun :mitsuko "LOAD-SETTINGS-PLUGIN")))))
                 (if module-init
                     (progn
                       (format t "Found compositor init function.~%")

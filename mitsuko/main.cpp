@@ -10,6 +10,7 @@
 #include <QTextCodec>
 #include <QGuiApplication>
 #include <QDebug>
+
 extern "C" void init_lib_MITSUKO__ALL_SYSTEMS(cl_object);
 
 int main(int argc, char **argv){

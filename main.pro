@@ -1,5 +1,5 @@
 TEMPLATE = subdirs
-SUBDIRS = MitsukoGridWM lisp/mitsuko_lib lisp/core lisp/float lisp/ion4 lisp/minimal mitsuko
+SUBDIRS = MitsukoGridWM mitsukosettings lisp/mitsuko_lib lisp/core lisp/float lisp/ion4 lisp/minimal mitsuko libraryloader
 
 desktop.files = mitsuko.desktop
 desktop.path = $$[QT_HOST_PREFIX]/share/wayland-sessions
