@@ -18,7 +18,8 @@
    #:run-command
    #:run-terminal
    #:shutdown
-   #:start))
+   #:start
+   #:update-qml-import-path))
 
 (in-package :mitsuko-core)
 (require "asdf")
@@ -119,6 +120,16 @@ data directories"
       (let ((command-with-path (find-in-path command)))
         (if command-with-path
             (uiop:launch-program command-with-path)))))
+
+(defun update-qml-import-path()
+  "Add all directories which may contain QML imports to import path."
+  (loop for path in *qml-search-path* do
+    (if
+     (and (probe-file path) (not (uiop:file-exists-p path)))
+     (progn
+       (format t "Adding ~A to QML search path.~%" path)
+       (|addImportPath| *qml-application-engine* path))
+     (format t "QML path ~A does not exist, skipping.~%" path))))
 
 ;;;; internal helpers
 (defun qapplication-exit()
@@ -337,13 +348,8 @@ will be sufficient."
         (setf *mitsuko-module* (uiop:getenv "MITSUKO_MODULE"))
         (format t "Setting ~A as mitsuko module.~%" *mitsuko-module*)))
   (setf *qml-application-engine* (qnew "QQmlApplicationEngine"))
-  (loop for path in *qml-search-path* do
-    (if
-     (and (probe-file path) (not (uiop:file-exists-p path)))
-     (progn
-       (format t "Adding ~A to QML search path.~%" path)
-       (|addImportPath| *qml-application-engine* path))
-     (format t "QML path ~A does not exist, skipping.~%" path))))
+  (update-qml-import-path)
+  (format t "QML import path is now ~A.~%" (|importPathList| *qml-application-engine*)))
 
 (defun vanilla-init()
   "The job of init is to load QML into the application engine, and do other
