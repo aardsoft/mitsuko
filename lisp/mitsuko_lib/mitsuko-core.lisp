@@ -40,6 +40,7 @@
 (defvar .startup-timer. nil)
 (defvar .shutdown-timer. nil)
 (defvar .status-code. 0)
+(defvar .shutting-down. nil)
 
 (defun find-in-path (program)
   "Try to locate an application in PATH"
@@ -82,6 +83,7 @@ absolute path if found, nil if not."
 make sure Qt is running - otherwise the application would dead lock. Therefore
 additional code execution before shutdown may still happen in rare instances."
   (format t "Shutting down mitsuko.~%")
+  (setq .shutting-down. t)
   (if exit-code
       (setf .status-code. exit-code))
   (if (and .mitsuko-initialized. (fboundp 'mitsuko-pre-shutdown))
@@ -143,6 +145,11 @@ data directories"
   (let ((fun (find-symbol symbol package)))
     (if fun
         (funcall fun))))
+
+(defun fatal(message)
+  "Print message and die"
+  (format t "~A~%" message)
+  (shutdown -1))
 
 ;;;; qml helpers
 ;; the qml generation is based on EQL5s palindrome example
@@ -301,6 +308,7 @@ data directories"
 ;;;; init
 (defun vanilla-load-module(module)
   "Load module specific setup."
+
   (if (fboundp 'mitsuko-pre-init-module)
       (mitsuko-pre-init-module)
       (progn
@@ -323,26 +331,30 @@ data directories"
                 (if (and module-flags (find-package :mitsuko))
                     (progn
                       (format t "Loading module flags.~%")
-                      (cond ((member :settings-plugin module-flags)
-                             (search-and-do-fun :mitsuko "LOAD-SETTINGS-PLUGIN")))))
+                      (if (member :settings-plugin module-flags)
+                          (unless
+                              (search-and-do-fun :mitsuko "LOAD-SETTINGS-PLUGIN")
+                            (fatal "Unable to load settings plugin")))))
                 (if module-init
                     (progn
                       (format t "Found compositor init function.~%")
                       (funcall module-init))))))
-
         ;; TODO, split this out to something like set-compositor
-        (|load| *qml-application-engine*
-                (|fromLocalFile.QUrl| (find-in-app-data (concatenate 'string module ".qml"))))))
-  (if (fboundp 'mitsuko-post-init-module)
-      (mitsuko-post-init-module)
-      (progn
-        (if (find-package :mitsuko-compositor)
-            (progn
-              (let ((module-init (find-symbol "POST-INIT-MODULE" :mitsuko-compositor)))
-                (if module-init
-                    (progn
-                      (format t "Found compositor post-init function.~%")
-                      (funcall module-init)))))))))
+        (unless .shutting-down.
+          (|load| *qml-application-engine*
+                  (|fromLocalFile.QUrl| (find-in-app-data (concatenate 'string module ".qml")))))))
+
+  (unless .shutting-down.
+    (if (fboundp 'mitsuko-post-init-module)
+        (mitsuko-post-init-module)
+        (progn
+          (if (find-package :mitsuko-compositor)
+              (progn
+                (let ((module-init (find-symbol "POST-INIT-MODULE" :mitsuko-compositor)))
+                  (if module-init
+                      (progn
+                        (format t "Found compositor post-init function.~%")
+                        (funcall module-init))))))))))
 
 (defun vanilla-pre-init()
   "The job of pre-init is to make sure there is a usable QQmlApplicationEngine
@@ -383,9 +395,10 @@ for rescue attempts if things went south."
 (defun vanilla-post-init()
   "Post init function executed once the Qt part is up and running. This could be
 used for starting initial applications in a session."
-  (format t "mitsuko startup finished.~%")
-  (if (fboundp 'mitsuko-post-init)
-      (mitsuko-post-init)))
+  (unless .shutting-down.
+    (format t "mitsuko startup finished.~%")
+    (if (fboundp 'mitsuko-post-init)
+        (mitsuko-post-init))))
 
 (defun start()
   (let ((init-file (find-in-app-data "mitsuko-init.lisp")))
