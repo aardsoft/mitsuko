@@ -9,7 +9,7 @@ ColumnLayout {
   anchors.fill: parent
   spacing: 0
 
-  StatusBar {
+  MitsukoStatusBar {
     visible: false
     id: topStatusBar
     objectName: "topStatusBar"
@@ -21,7 +21,7 @@ ColumnLayout {
   RowLayout {
     spacing: 0
 
-    StatusBar {
+    MitsukoStatusBar {
       visible: false
       id: leftStatusBar
       objectName: "leftStatusBar"
@@ -47,7 +47,7 @@ ColumnLayout {
       }
     }
 
-    StatusBar {
+    MitsukoStatusBar {
       visible: false
       id: rightStatusBar
       objectName: "rightStatusBar"
@@ -57,7 +57,7 @@ ColumnLayout {
     }
   }
 
-  StatusBar {
+  MitsukoStatusBar {
     id: bottomStatusBar
     objectName: "bottomStatusBar"
     height: 10

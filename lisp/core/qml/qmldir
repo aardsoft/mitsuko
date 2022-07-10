@@ -1,5 +1,6 @@
 module MitsukoCore
-StatusBar 1.0 StatusBar.qml
+MitsukoStatusBar 1.0 MitsukoStatusBar.qml
 MitsukoMenu 1.0 MitsukoMenu.qml
 MitsukoDesktop 1.0 MitsukoDesktop.qml
 MitsukoWindow 1.0 MitsukoWindow.qml
+MitsukoShortcuts 1.0 MitsukoShortcuts.qml
