@@ -14,7 +14,7 @@
   (setf *mitsuko-settings* (qload-c++ "/home/bwachter/git/misc/mitsuko/build/mitsukosettings/libMitsukoSettings"))
   (if *mitsuko-settings*
       (progn
-
+        t
         )
     (format t "Failed to load mitsuko-settings.~%"))
   )
