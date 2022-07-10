@@ -28,6 +28,7 @@ MitsukoSettings::MitsukoSettings():
     QSettings::IniFormat){
   m_initialized=true;
   m_notify=true;
+  m_initializeDefaults=true;
 }
 
 bool MitsukoSettings::notify(){
@@ -43,6 +44,17 @@ void MitsukoSettings::setNotify(const bool value){
 QVariant MitsukoSettings::setting(const QString &key, const QVariant &defaultValue){
   MitsukoSettings *_instance=MitsukoSettings::instance();
   return _instance->value(key, defaultValue);
+}
+
+QVariant MitsukoSettings::value(const QString &key, const QVariant &defaultValue){
+  if (QSettings::value(key) == QVariant() &&
+      defaultValue != QVariant() &&
+      m_initializeDefaults == true){
+    m_notify=false;
+    setValue(key, defaultValue);
+    m_notify=true;
+  }
+  return QSettings::value(key, defaultValue);
 }
 
 bool MitsukoSettings::settingBool(const QString &key, const bool defaultValue){

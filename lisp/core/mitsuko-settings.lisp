@@ -19,8 +19,13 @@
 (defvar .default-settings.
       '(1
         (("core" .
-          (("version" int 2)
+          (("version" int 1)
            ("statusBarZ" int 9000)))
+         ("decoration" .
+          (("height" int 15)
+           ("gradient" string "DeepBlue")))
+         ("shortcuts" .
+          (("toggleLispRepl" string "CTRL+~")))
          ("leftStatusBar" .
           (("visible" bool nil)
            ("color" string "black")
