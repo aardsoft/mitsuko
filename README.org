@@ -31,6 +31,8 @@
     - [[#float-implementation][float implementation]]
     - [[#ion4-implementation][ion4 implementation]]
   - [[#references][References]]
+    - [[#qt-and-wayland][Qt and Wayland]]
+    - [[#lisp][Lisp]]
 
 ** Introduction
 This is an attempt to create a framework to easily create and modify Wayland compositors using QML and Lisp, as well as including one or more fully usable reference implementations.
@@ -236,5 +238,11 @@ This aims to be a tiling window manager, implementing the main features I use in
 Currently there are experiments to decide if logic should come from the C++ side via MitsukoGridWM extension, or be fully done with QML only.
 
 ** References
+*** Qt and Wayland
 - [[https://wayland.freedesktop.org/docs/html/apa.html][Wayland Protocol Specification]]
+- [[https://wayland-book.com/][The Wayland Protocol (Wayland Book)]]
+  - Toplevel documentation [[https://wayland-book.com/xdg-shell-basics/xdg-toplevel.html][in Wayland Book]] and [[https://doc.qt.io/qt-5/qml-qtwayland-compositor-xdgtoplevel.html][QtWayland]]
 - [[https://doc.qt.io/qt-5/inputs-linux-device.html][Qt Inputs on Embedded Linux devices]]
+- [[https://doc.qt.io/qt-5/qtquick-visualcanvas-visualparent.html][QML element visual/stacking order]]
+*** Lisp
+- [[https://lisp-lang.org/style-guide/#variables][Variable style guid]]
